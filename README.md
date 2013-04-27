@@ -49,7 +49,7 @@ And let's go !!
 
 ###Squeeze version :
 
-> ./build_rpi_sd_card.raspbian.squeeze.sh sd-4gb.bin | tee gen.log
+> ./build_rpi_sd_card.debian.squeeze.sh sd-4gb.bin | tee gen.log
 
 ###Wheezy version :
 
