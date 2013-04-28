@@ -24,7 +24,7 @@
 # apt-get install binfmt-support qemu qemu-user-static debootstrap kpartx dosfstools
 
 #deb_mirror="http://archive.raspbian.org/raspbian/"
-deb_mirror="http://mirrordirector.raspbian.org/debian/"
+deb_mirror="http://archive.raspberrypi.org/debian/"
 ras_mirror="http://mirrordirector.raspbian.org/raspbian/"
 #deb_mirror="http://ftp.debian.org/debian/"
 #deb_local_mirror="http://debian.kmp.or.at:3142/debian/"
@@ -77,7 +77,10 @@ w
 EOF
 
 
+  echo "losetup detach begin"
+  dmsetup remove_all
   losetup -d $device
+  echo "losetup detach end"
   device=`kpartx -va $image | sed -E 's/.*(loop[0-9])p.*/\1/g' | head -1`
   device="/dev/mapper/${device}"
   bootp=${device}p1
@@ -97,7 +100,7 @@ cd $rootfs
 echo "pwd=`pwd`"
 
 wget http://archive.raspbian.org/raspbian.public.key -O - | apt-key add -
-qemu-debootstrap --verbose --keyring /etc/apt/trusted.gpg --foreign --arch=armhf $deb_release $rootfs $deb_local_mirror
+debootstrap --verbose --keyring /etc/apt/trusted.gpg --foreign --arch=armhf $deb_release $rootfs $deb_local_mirror
 echo "Suite"
 cp /usr/bin/qemu-arm-static usr/bin/
 LANG=C chroot $rootfs /debootstrap/debootstrap --second-stage
@@ -150,6 +153,8 @@ deb $deb_mirror $deb_release main
 " > etc/apt/sources.list
 
 echo "#!/bin/bash
+wget http://archive.raspbian.org/raspbian.public.key -O - | apt-key add -
+wget http://archive.raspberrypi.org/debian/raspberrypi.gpg.key -O - | apt-key add -
 aptitude update
 aptitude clean
 apt-get clean
@@ -166,6 +171,10 @@ umount $rootp
   kpartx -d $image
   echo "created image $image"
 
+dmsetup remove_all
+losetup -d $device
+
+rm -Rf test
 
 echo "done."
 
