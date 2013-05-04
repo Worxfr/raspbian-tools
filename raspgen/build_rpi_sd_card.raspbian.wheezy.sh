@@ -178,7 +178,7 @@ dmsetup remove_all || echo "dmsetup failed"
 losetup -d $device || echo "losetup failed"
 
 
-rm -Rf test
+rm -Rf $buildenv
 
 echo "done."
 
