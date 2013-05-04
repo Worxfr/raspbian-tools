@@ -165,14 +165,18 @@ LANG=C chroot $rootfs /cleanup
 
 cd
 
+device=`losetup -a | cut -d":" -f1`
+
+
 umount $bootp
 umount $rootp
 
   kpartx -d $image
   echo "created image $image"
 
-dmsetup remove_all
-losetup -d $device
+dmsetup remove_all || echo "dmsetup failed"
+losetup -d $device || echo "losetup failed"
+
 
 rm -Rf test
 
