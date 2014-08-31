@@ -28,6 +28,8 @@ deb_mirror="http://archive.raspberrypi.org/debian/"
 ras_mirror="http://mirrordirector.raspbian.org/raspbian/"
 #deb_mirror="http://ftp.debian.org/debian/"
 #deb_local_mirror="http://debian.kmp.or.at:3142/debian/"
+#http_proxy="http://10.0.0.1:3128"
+
 
 bootsize="64M"
 deb_release="wheezy"
@@ -98,12 +100,13 @@ echo "pwd=`pwd`"
 echo "rootfs=$rootfs"
 cd $rootfs
 echo "pwd=`pwd`"
-
+echo "http_proxy=$http_proxy"
+export http_proxy=$http_proxy 
 wget http://archive.raspbian.org/raspbian.public.key -O - | apt-key add -
 debootstrap --verbose --keyring /etc/apt/trusted.gpg --foreign --arch=armhf $deb_release $rootfs $deb_local_mirror
 echo "Suite"
 cp /usr/bin/qemu-arm-static usr/bin/
-LANG=C chroot $rootfs /debootstrap/debootstrap --second-stage
+LANG=C chroot $rootfs /debootstrap/debootstrap  --verbose --second-stage
 
 mount $bootp $bootfs
 
@@ -130,13 +133,14 @@ snd_bcm2835
 " >> /etc/modules
 
 echo "#!/bin/bash
+export http_proxy=$http_proxy
 apt-get update 
-apt-get -y install git-core binutils ca-certificates
+apt-get -y install git-core binutils ca-certificates curl
 wget http://goo.gl/1BOfJ -O /usr/bin/rpi-update
 chmod +x /usr/bin/rpi-update
 mkdir -p /lib/modules/3.1.11+
 touch /boot/start.elf
-rpi-update
+http_proxy=$http_proxy SKIP_BACKUP=1 rpi-update
 apt-get -y install locales console-common ntp openssh-server less vim
 dpkg-reconfigure tzdata
 apt-get clean
@@ -153,6 +157,7 @@ deb $deb_mirror $deb_release main
 " > etc/apt/sources.list
 
 echo "#!/bin/bash
+export http_proxy=$http_proxy
 wget http://archive.raspbian.org/raspbian.public.key -O - | apt-key add -
 wget http://archive.raspberrypi.org/debian/raspberrypi.gpg.key -O - | apt-key add -
 aptitude update
